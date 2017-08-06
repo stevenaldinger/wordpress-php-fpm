@@ -1,0 +1,36 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+    - 8080:80
+    volumes:
+    - ./site.conf:/etc/nginx/conf.d/default.conf
+    - ./data/www:/var/www/html
+
+  mysql:
+    image: mariadb
+    command: mysqld --innodb-buffer-pool-size=20M --bind-address=0.0.0.0
+    ports:
+    - 3306:3306
+    volumes:
+    - ./data/mariadb:/var/lib/mysql
+    environment:
+    - MYSQL_ROOT_PASSWORD=rootpass
+    - MYSQL_DATABASE=wordpress
+    - MYSQL_USER=wordpressuser
+    - MYSQL_PASSWORD=password
+
+  php:
+    image: stevenaldinger/wordpress-php-fpm:latest
+    build: .
+    volumes:
+    - ./data/www:/var/www/html
+    ports:
+    - 9000:9000
+    environment:
+    - DB_HOST=mysql
+    - DATABASE=wordpress
+    - DB_USER=wordpressuser
+    - DB_PASSWORD=password
+    - WORDPRESS_HOST=localhost
